@@ -1,6 +1,6 @@
 import "@/styles/globals.css";
+import "@/styles/classes.css";
 import type { AppProps } from "next/app";
-import "@/styles/globals.css";
 import { mumbaiFork } from "@/utils";
 import { configureChains } from "@wagmi/core";
 import { publicProvider } from "wagmi/providers/public";

@@ -11,7 +11,7 @@ import {
 } from "@/utils";
 import { createWalletClient, http, custom, WalletClient, PublicClient, parseEther } from "viem";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
-// import { abi } from "../../abi/AirdropLevel0.json";
+import { abi } from "../../abi/RoboPunksNFT.json";
 import {
   SismoConnectButton,
   SismoConnectClientConfig,
@@ -45,7 +45,7 @@ export enum APP_STATES {
 
 // The application calls contracts on Mumbai testnet
 const userChain = goerli;
-const contractAddress = "";
+const contractAddress = "0x47390f0a1a14caf8b63320f27c47a2de255409e1";
 // TODO: Remplace with merchant address
 
 
@@ -97,14 +97,18 @@ export default function RegisterTwitterUser() {
     setAppState(APP_STATES.purchasing);
     // switch the network
     await switchNetwork(userChain);
-    const abi = null; //TODO: REMOVE THIS
+    console.log(publicClient)
+    console.log(walletClient)
+    console.log(address)
+    console.log(contractAddress)
+
     try {
-      const tokenId = await callContract({
+      const txReceipt = await callContract({
         contractAddress,
         responseBytes,
         abi,
         userChain,
-        address: address as `0x${string}`,
+        address: `${"0xC044A7B23665DC7C17F2565F5ABC74A0530A793A"}`,
         publicClient,
         walletClient,
       });
@@ -119,13 +123,12 @@ export default function RegisterTwitterUser() {
 
   return (
     <>
-      {/* <BackButton /> */}
       <div className="container">
         {appState == APP_STATES.init && (
           <>
-            <h1>Anonymous Registration</h1>
+            <h1>Anonymous purchase</h1>
             <p className="subtitle-page" style={{ marginBottom: 40 }}>
-              Connect your Twitter account to continue your purchase.
+              Connect with Twitter to access your wallet.
             </p>
 
             <SismoConnectButton
@@ -141,19 +144,21 @@ export default function RegisterTwitterUser() {
 
         {/** Simple button to call the smart contract with the response as bytes */}
         {appState == APP_STATES.receivedProof && (
-          <button
-            className="wallet-button"
+          <button className="wallet-button"
             onClick={async () => {
               await buyWithSismo(responseBytes);
             }}
-            value="Buy now"
+            value="Pay now"
           >
-            {" "}
-            Buy {" "}
+            {"PAY NOW!"}
           </button>
         )}
         {appState == APP_STATES.purchasing && (
           <p style={{ marginBottom: 40 }}>Buying...</p>
+        )}
+        {/** Simple button to call the smart contract with the response as bytes */}
+        {appState == APP_STATES.success && (
+          <p>{"BBBBBBBb"}</p>
         )}
       </div >
     </>

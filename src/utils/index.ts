@@ -47,10 +47,10 @@ export const goerli = {
   nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 },
   rpcUrls: {
     default: {
-      http: ["https://goerli.infura.io/v3/" + process.env.INFURA_API_KEY],
+      http: ["https://goerli.infura.io/v3/3eb18f8fb50f4d44b0747060cefabcbf"],
     },
     public: {
-      http: ["https://goerli.infura.io/v3/" + process.env.INFURA_API_KEY],
+      http: ["https://goerli.infura.io/v3/3eb18f8fb50f4d44b0747060cefabcbf"],
     },
   },
 } as const satisfies Chain;
@@ -129,8 +129,8 @@ export const callContract = async ({
   const txArgs = {
     address: contractAddress as `0x${string}`,
     abi: abi,
-    functionName: "claimWithSismo", // call the claimWithSismo function
-    args: [responseBytes],
+    functionName: "mintPrice", // TODO: Change it to functionName of railgun SC
+    args: [],
     account: address,
     chain: userChain,
   };
