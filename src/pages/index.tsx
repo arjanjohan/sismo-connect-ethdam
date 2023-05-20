@@ -130,48 +130,53 @@ export default function RegisterTwitterUser() {
     <>
       <div className="container">
         {appState == APP_STATES.init &&
-          !isConnected &&
           (
             <>
-              <div>
-                {connectors.map((connector) => (
-                  <button
-                    disabled={!connector.ready}
-                    key={connector.id}
-                    onClick={() => {
-                      connect({ connector });
-                    }}
-                    className="wallet-button"
-                  >
-                    Connect Wallet
-                    {!connector.ready && " (unsupported)"}
-                    {isLoading && connector.id === pendingConnector?.id && " (connecting)"}
-                  </button>
-                ))}
+              {!isConnected &&
+                (
+                  <>
+                    <div>
+                      {connectors.map((connector) => (
+                        <button
+                          disabled={!connector.ready}
+                          key={connector.id}
+                          onClick={() => {
+                            connect({ connector });
+                          }}
+                          className="wallet-button"
+                        >
+                          Connect Wallet
+                          {/* {!connector.ready && "(unsupported)"} */}
+                          {isLoading && connector.id === pendingConnector?.id && " (connecting)"}
+                        </button>
+                      ))}
 
-                {error && <div>{error.message}</div>}
-              </div>
-            </>
-          )}
-        {appState == APP_STATES.init &&
-          isConnected &&
-          (
-            <>
-              <h1>Anonymous purchase</h1>
-              <p className="subtitle-page" style={{ marginBottom: 40 }}>
-                Connect with Twitter to access your wallet.
-              </p>
+                      {error && <div>{error.message}</div>}
+                    </div>
+                  </>
+                )}
+              {isConnected &&
+                (
+                  <>
+                    <h1>Anonymous purchase</h1>
+                    <p className="subtitle-page" style={{ marginBottom: 40 }}>
+                      Connect with Twitter to access your wallet.
+                    </p>
 
-              <SismoConnectButton
-                config={sismoConnectConfig}
-                auths={[{ authType: AuthType.TWITTER }]}
-                onResponse={(response: SismoConnectResponse) => verify(response)}
-                loading={loading}
-                text="Connect Twitter with Sismo"
-              />
-              <>{error}</>
+                    <SismoConnectButton
+                      config={sismoConnectConfig}
+                      auths={[{ authType: AuthType.TWITTER }]}
+                      onResponse={(response: SismoConnectResponse) => verify(response)}
+                      loading={loading}
+                      text="Connect Twitter with Sismo"
+                    />
+                    <>{error}</>
+                  </>
+                )
+              }
             </>
-          )}
+          )
+        }
 
         {/** Simple button to call the smart contract with the response as bytes */}
         {appState == APP_STATES.receivedProof && (
