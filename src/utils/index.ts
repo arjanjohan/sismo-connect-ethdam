@@ -6,6 +6,7 @@ import {
   createWalletClient,
   encodeAbiParameters,
   http,
+  keccak256,
   parseEther,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
@@ -47,10 +48,10 @@ export const goerli = {
   nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 },
   rpcUrls: {
     default: {
-      http: ["https://goerli.infura.io/v3/3eb18f8fb50f4d44b0747060cefabcbf"],
+      http: ["https://rpc.ankr.com/eth_goerli"],
     },
     public: {
-      http: ["https://goerli.infura.io/v3/3eb18f8fb50f4d44b0747060cefabcbf"],
+      http: ["https://rpc.ankr.com/eth_goerli"],
     },
   },
 } as const satisfies Chain;
@@ -134,11 +135,12 @@ export const callContract = async ({
     account: address,
     chain: userChain,
   };
-
   // simulate the call to the contract to get the error if the call reverts
   await publicClient.simulateContract(txArgs);
   // if the simulation call does not revert, send the tx to the contract
-  const txHash = await walletClient.writeContract(txArgs);
+  // const gm1 = await walletClient.getAddresses
+  const txHash = await walletClient.writeContract(txArgs); //TODO This one still fails
+  //TODO This one still fails
   // wait for the tx to be mined
   const receipt = (await publicClient.waitForTransactionReceipt({
     hash: txHash,

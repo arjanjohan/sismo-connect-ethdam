@@ -54,7 +54,6 @@ export default function RegisterTwitterUser() {
   const [loading, setLoading] = useState(false);
   const [responseBytes, setResponseBytes] = useState<string>("");
 
-  const [error, setError] = useState(null);
   const [contractError, setContractError] = useState<string>("");
   const [verifiedUser, setVerifiedUser] = useState<UserType>(null);
   const [walletClient, setWalletClient] = useState<WalletClient>(
@@ -67,6 +66,12 @@ export default function RegisterTwitterUser() {
   const publicClient: PublicClient = getPublicClient(userChain);
 
   const { address, isConnected } = useAccount();
+  const { connect, connectors, error, isLoading, pendingConnector } = useConnect();
+  const { disconnect } = useDisconnect();
+
+  console.log("IK HEB EEN ADRES GEVONDEN")
+  console.log(address)
+  console.log(isConnected)
 
   async function verify(response: SismoConnectResponse) {
     // first we update the react state to show the loading state
@@ -85,7 +90,7 @@ export default function RegisterTwitterUser() {
       setAppState(APP_STATES.receivedProof);
     } catch (e) {
       // Else if the proof is invalid, we show an error message
-      setError("Invalid response");
+      // setError("Invalid response");
       console.error(e);
     } finally {
       // We set the loading state to false to show the user profile
@@ -99,7 +104,7 @@ export default function RegisterTwitterUser() {
     await switchNetwork(userChain);
     console.log(publicClient)
     console.log(walletClient)
-    console.log(address)
+    console.log(address) //TODO ITS EMPTY
     console.log(contractAddress)
 
     try {
@@ -108,7 +113,7 @@ export default function RegisterTwitterUser() {
         responseBytes,
         abi,
         userChain,
-        address: `${"0xC044A7B23665DC7C17F2565F5ABC74A0530A793A"}`,
+        address: address as `0x${string}`,
         publicClient,
         walletClient,
       });
@@ -124,23 +129,49 @@ export default function RegisterTwitterUser() {
   return (
     <>
       <div className="container">
-        {appState == APP_STATES.init && (
-          <>
-            <h1>Anonymous purchase</h1>
-            <p className="subtitle-page" style={{ marginBottom: 40 }}>
-              Connect with Twitter to access your wallet.
-            </p>
+        {appState == APP_STATES.init &&
+          !isConnected &&
+          (
+            <>
+              <div>
+                {connectors.map((connector) => (
+                  <button
+                    disabled={!connector.ready}
+                    key={connector.id}
+                    onClick={() => {
+                      connect({ connector });
+                    }}
+                    className="wallet-button"
+                  >
+                    Connect Wallet
+                    {!connector.ready && " (unsupported)"}
+                    {isLoading && connector.id === pendingConnector?.id && " (connecting)"}
+                  </button>
+                ))}
 
-            <SismoConnectButton
-              config={sismoConnectConfig}
-              auths={[{ authType: AuthType.TWITTER }]}
-              onResponse={(response: SismoConnectResponse) => verify(response)}
-              loading={loading}
-              text="Connect Twitter with Sismo"
-            />
-            <>{error}</>
-          </>
-        )}
+                {error && <div>{error.message}</div>}
+              </div>
+            </>
+          )}
+        {appState == APP_STATES.init &&
+          isConnected &&
+          (
+            <>
+              <h1>Anonymous purchase</h1>
+              <p className="subtitle-page" style={{ marginBottom: 40 }}>
+                Connect with Twitter to access your wallet.
+              </p>
+
+              <SismoConnectButton
+                config={sismoConnectConfig}
+                auths={[{ authType: AuthType.TWITTER }]}
+                onResponse={(response: SismoConnectResponse) => verify(response)}
+                loading={loading}
+                text="Connect Twitter with Sismo"
+              />
+              <>{error}</>
+            </>
+          )}
 
         {/** Simple button to call the smart contract with the response as bytes */}
         {appState == APP_STATES.receivedProof && (
