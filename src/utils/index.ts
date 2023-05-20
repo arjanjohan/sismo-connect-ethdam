@@ -9,12 +9,20 @@ import {
   parseEther,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
+import { TransactionReceipt as ViemTransactionReceipt } from "viem";
 
 declare global {
   interface Window {
     ethereum?: any;
   }
 }
+// import dotenv from "dotenv";
+
+// dotenv.config();
+
+export type TransactionReceipt = ViemTransactionReceipt & {
+  logs: ViemTransactionReceipt["logs"] & { topics: string[] }[];
+};
 
 export const mumbaiFork = {
   id: 5151110,
@@ -27,6 +35,22 @@ export const mumbaiFork = {
     },
     public: {
       http: ["http://127.0.0.1:8545"],
+    },
+  },
+} as const satisfies Chain;
+
+
+export const goerli = {
+  id: 5,
+  name: "Goerli",
+  network: "goerli",
+  nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 },
+  rpcUrls: {
+    default: {
+      http: ["https://goerli.infura.io/v3/" + process.env.INFURA_API_KEY],
+    },
+    public: {
+      http: ["https://goerli.infura.io/v3/" + process.env.INFURA_API_KEY],
     },
   },
 } as const satisfies Chain;
@@ -116,11 +140,15 @@ export const callContract = async ({
   // if the simulation call does not revert, send the tx to the contract
   const txHash = await walletClient.writeContract(txArgs);
   // wait for the tx to be mined
-  const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
+  const receipt = (await publicClient.waitForTransactionReceipt({
+    hash: txHash,
+  })) as TransactionReceipt;
 
-  // the tokenId of the NFT minted is the 4th topic of the event emitted by the contract
-  const tokenId = (receipt as { logs: { topics: string[] }[] }).logs[0].topics[3];
-  return tokenId;
+  // Check that there is at least one log before trying to access it
+  if (receipt.logs.length > 0) {
+    const tokenId = receipt.logs[0].topics[3];
+    return tokenId;
+  }
 };
 
 export const signMessage = (address: `0x${string}` | undefined) => {

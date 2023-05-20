@@ -2,6 +2,7 @@ import BackButton from "@/components/BackButton";
 import {
   switchNetwork,
   mumbaiFork,
+  goerli,
   getPublicClient,
   handleVerifyErrors,
   callContract,
@@ -11,7 +12,6 @@ import {
 import { createWalletClient, http, custom, WalletClient, PublicClient, parseEther } from "viem";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
 // import { abi } from "../../abi/AirdropLevel0.json";
-
 import {
   SismoConnectButton,
   SismoConnectClientConfig,
@@ -36,7 +36,6 @@ type UserType = {
   id: string;
 };
 
-
 export enum APP_STATES {
   init,
   receivedProof,
@@ -45,7 +44,7 @@ export enum APP_STATES {
 }
 
 // The application calls contracts on Mumbai testnet
-const userChain = mumbaiFork;
+const userChain = goerli;
 const contractAddress = "";
 // TODO: Remplace with merchant address
 
@@ -53,6 +52,8 @@ const contractAddress = "";
 export default function RegisterTwitterUser() {
   const [appState, setAppState] = useState<APP_STATES>(APP_STATES.init);
   const [loading, setLoading] = useState(false);
+  const [responseBytes, setResponseBytes] = useState<string>("");
+
   const [error, setError] = useState(null);
   const [contractError, setContractError] = useState<string>("");
   const [verifiedUser, setVerifiedUser] = useState<UserType>(null);
@@ -81,9 +82,7 @@ export default function RegisterTwitterUser() {
       const user = res.data;
 
       // If the proof is valid, we update the user react state to show the user profile
-      setVerifiedUser({
-        id: user.id,
-      });
+      setAppState(APP_STATES.receivedProof);
     } catch (e) {
       // Else if the proof is invalid, we show an error message
       setError("Invalid response");
@@ -94,7 +93,7 @@ export default function RegisterTwitterUser() {
     }
   }
 
-  async function claimWithSismo(responseBytes: string) {
+  async function buyWithSismo(responseBytes: string) {
     setAppState(APP_STATES.purchasing);
     // switch the network
     await switchNetwork(userChain);
@@ -122,7 +121,7 @@ export default function RegisterTwitterUser() {
     <>
       {/* <BackButton /> */}
       <div className="container">
-        {!verifiedUser && (
+        {appState == APP_STATES.init && (
           <>
             <h1>Anonymous Registration</h1>
             <p className="subtitle-page" style={{ marginBottom: 40 }}>
@@ -140,22 +139,23 @@ export default function RegisterTwitterUser() {
           </>
         )}
 
-        {verifiedUser && (
-          <>
-            <h1>You have been registered</h1>
-            <p className="subtitle-page">
-              You shared an anonymous userId and saved it in a local database
-            </p>
-            <div className="profile-container">
-              <div>
-                <h2 style={{ marginBottom: 10 }}>User Profile</h2>
-                <b>UserId:</b>
-                <p>{verifiedUser?.id}</p>
-              </div>
-            </div>
-          </>
+        {/** Simple button to call the smart contract with the response as bytes */}
+        {appState == APP_STATES.receivedProof && (
+          <button
+            className="wallet-button"
+            onClick={async () => {
+              await buyWithSismo(responseBytes);
+            }}
+            value="Buy now"
+          >
+            {" "}
+            Buy {" "}
+          </button>
         )}
-      </div>
+        {appState == APP_STATES.purchasing && (
+          <p style={{ marginBottom: 40 }}>Buying...</p>
+        )}
+      </div >
     </>
   );
 }
