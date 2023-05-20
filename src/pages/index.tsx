@@ -36,6 +36,7 @@ type UserType = {
   id: string;
 };
 
+
 export enum APP_STATES {
   init,
   receivedProof,
