@@ -146,7 +146,7 @@ export default function RegisterTwitterUser() {
                           className="wallet-button"
                         >
                           Connect Wallet
-                          {/* {!connector.ready && "(unsupported)"} */}
+                          {!connector.ready && "(unsupported)"}
                           {isLoading && connector.id === pendingConnector?.id && " (connecting)"}
                         </button>
                       ))}
