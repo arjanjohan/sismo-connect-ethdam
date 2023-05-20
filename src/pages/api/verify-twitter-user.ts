@@ -6,18 +6,14 @@ import {
   AuthType,
   SismoConnectVerifiedResult,
 } from "@sismo-core/sismo-connect-server";
-import { devGroups } from "../../../config";
 
 /************************************************ */
 /********* A SIMPLE IN-MEMORY DATABASE ********** */
 /************************************************ */
-
 type UserType = {
   id: string;
-  name: string;
 };
 
-// this is a simple in-memory user store
 class MyLocalDataBase {
   private userStore = new Map<string, UserType>();
 
@@ -38,7 +34,7 @@ const userStore = new MyLocalDataBase();
 // define the SismoConnect configuration
 const sismoConnectConfig: SismoConnectServerConfig = {
   // you can create a new Sismo Connect app at https://factory.sismo.io
-  appId: "0xf4977993e52606cfd67b7a1cde717069",
+  appId: "0xa4f0ae192a10871c403b3f971bba4291",
   devMode: {
     enabled: true,
   },
@@ -51,29 +47,22 @@ const sismoConnect = SismoConnect(sismoConnectConfig);
 /***************** THE API ROUTE **************** */
 /************************************************ */
 
-// this is the API route that is called by the SismoConnectButton
+// this is the API route that is called by the SismoConnectButton on level 0
 export default async function handler(req: NextApiRequest, res: NextApiResponse<UserType | void>) {
   const { response } = req.body;
 
-  console.log("response", response);
   try {
     const result: SismoConnectVerifiedResult = await sismoConnect.verify(response, {
-      auths: [{ authType: AuthType.VAULT }],
-      claims: [{ groupId: devGroups[0].groupId }],
-      signature: {
-        message: "",
-        isSelectableByUser: true,
-      },
+      auths: [{ authType: AuthType.TWITTER }],
     });
 
+    // the userId is an app-specific, anonymous identifier of a vault
+    // userId = hash(userVaultSecret, appId).
     const user = {
-      // the userId is an app-specific, anonymous identifier of a vault
-      // userId = hash(userVaultSecret, appId).
-      id: result.getUserId(AuthType.VAULT),
-      name: result.getSignedMessage(),
+      id: result.getUserId(AuthType.TWITTER),
     };
 
-    // save the user in the user store DB
+    // store the user in the database
     userStore.setUser(user);
 
     res.status(200).send(user);
