@@ -19,7 +19,7 @@ import {
   AuthType,
 } from "@sismo-core/sismo-connect-react";
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { devGroups } from "../../config";
 
 export const sismoConnectConfig: SismoConnectClientConfig = {
@@ -68,6 +68,18 @@ export default function RegisterTwitterUser() {
   const { address, isConnected } = useAccount();
   const { connect, connectors, error, isLoading, pendingConnector } = useConnect();
   const { disconnect } = useDisconnect();
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    setWalletClient(
+      createWalletClient({
+        chain: userChain,
+        transport: custom(window.ethereum, {
+          key: "windowProvider",
+        }),
+      }) as WalletClient
+    );
+  }, [address]);
 
   console.log("IK HEB EEN ADRES GEVONDEN")
   console.log(address)
