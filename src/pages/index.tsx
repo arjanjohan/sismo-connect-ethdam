@@ -3,6 +3,7 @@ import {
   switchNetwork,
   mumbaiFork,
   goerli,
+  polygon,
   getPublicClient,
   handleVerifyErrors,
   callContract,
@@ -21,6 +22,8 @@ import {
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import { devGroups } from "../../config";
+import { ethers } from "ethers";
+import shieldTokens from "@/railgunCaller";
 
 export const sismoConnectConfig: SismoConnectClientConfig = {
   // you can create a new Sismo Connect app at https://factory.sismo.io
@@ -44,10 +47,9 @@ export enum APP_STATES {
 }
 
 // The application calls contracts on Mumbai testnet
-const userChain = goerli;
-const contractAddress = "0x47390f0a1a14caf8b63320f27c47a2de255409e1";
+const userChain = polygon;
+const contractAddress = "0xc7FfA542736321A3dd69246d73987566a5486968";
 // TODO: Remplace with merchant address
-
 
 export default function RegisterTwitterUser() {
   const [appState, setAppState] = useState<APP_STATES>(APP_STATES.init);
@@ -69,21 +71,22 @@ export default function RegisterTwitterUser() {
   const { connect, connectors, error, isLoading, pendingConnector } = useConnect();
   const { disconnect } = useDisconnect();
 
+
+  //IT WONT PROMPT WALLET CONNECT but does retrieve connected wallet
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined") {
+      console.log("UNDEFINED")
+      return
+    };
     setWalletClient(
       createWalletClient({
         chain: userChain,
         transport: custom(window.ethereum, {
-          key: "windowProvider",
+          key: " ",
         }),
       }) as WalletClient
     );
   }, [address]);
-
-  console.log("IK HEB EEN ADRES GEVONDEN")
-  console.log(address)
-  console.log(isConnected)
 
   async function verify(response: SismoConnectResponse) {
     // first we update the react state to show the loading state
@@ -120,15 +123,16 @@ export default function RegisterTwitterUser() {
     console.log(contractAddress)
 
     try {
-      const txReceipt = await callContract({
-        contractAddress,
-        responseBytes,
-        abi,
-        userChain,
-        address: address as `0x${string}`,
-        publicClient,
-        walletClient,
-      });
+      shieldTokens();
+      // const txReceipt = await callContract({
+      //   contractAddress,
+      //   responseBytes,
+      //   abi,
+      //   userChain,
+      //   address: address as `0x${string}`,
+      //   publicClient,
+      //   walletClient,
+      // });
       // If the proof is valid, we update the user react state to show the tokenId
       setAppState(APP_STATES.success);
     } catch (e) {
@@ -183,6 +187,7 @@ export default function RegisterTwitterUser() {
                       text="Connect Twitter with Sismo"
                     />
                     <>{error}</>
+
                   </>
                 )
               }
@@ -206,9 +211,10 @@ export default function RegisterTwitterUser() {
         )}
         {/** Simple button to call the smart contract with the response as bytes */}
         {appState == APP_STATES.success && (
-          <p>{"BBBBBBBb"}</p>
+          <p>{"SUCCESS"}</p>
         )}
       </div >
     </>
   );
 }
+
