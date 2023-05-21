@@ -1,0 +1,88 @@
+import { ethers } from "ethers";
+import {
+  switchNetwork,
+  mumbaiFork,
+  goerli,
+  polygon,
+  getPublicClient,
+  handleVerifyErrors,
+  callContract,
+  signMessage,
+  publicWalletClient,
+} from "@/utils";
+import {
+  populateShield,
+  getShieldPrivateKeySignatureMessage,
+  gasEstimateForShield,
+} from "@railgun-community/quickstart";
+import {
+  RailgunERC20AmountRecipient,
+  NetworkName,
+  EVMGasType,
+  deserializeTransaction,
+} from "@railgun-community/shared-models";
+
+// The provider would come from your Web3 connection.
+const provider = new ethers.providers.Web3Provider(window.ethereum);
+// Get signer - this is the wallet that is currently connected.
+const signer = provider.getSigner();
+
+async function shieldTokens() {
+  const erc20AmountRecipients: RailgunERC20AmountRecipient[] = [
+    {
+      tokenAddress: "0x0000000000000000000000000000000000001010", // MATIC
+      amountString: "0x10", // hexadecimal amount
+      recipientAddress: "0zk1qy427vqjydgrm0nuz70dpwk9xqu6q6gz96h7nwgmmuc488qkqcefdrv7j6fe3z53l77mapfxzfnpac37jwst85676382snn0pe3xn6phtzchsms90mtzxfqq9ah", // RAILGUN address
+    },
+  ];
+
+  const shieldSignatureMessage = getShieldPrivateKeySignatureMessage();
+  const shieldPrivateKey = ethers.utils.keccak256(
+    await signer.signMessage(shieldSignatureMessage)
+  );
+
+  const { gasEstimateString } = await gasEstimateForShield(
+    NetworkName.Ethereum,
+    shieldPrivateKey,
+    erc20AmountRecipients,
+    [], // nftAmountRecipients
+    signer.getAddress()
+  );
+
+  const gasDetailsSerialized = {
+    evmGasType: EVMGasType.Type2, // Depends on the chain (BNB uses type 0)
+    gasEstimateString,
+    maxFeePerGasString: "0x100000", // Current gas Max Fee
+    maxPriorityFeePerGasString: "0x010000", // Current gas Max Priority Fee
+  };
+
+  const { serializedTransaction, error } = await populateShield(
+    NetworkName.Ethereum,
+    shieldPrivateKey,
+    erc20AmountRecipients,
+    [], // nftAmountRecipients
+    gasDetailsSerialized
+  );
+  if (error) {
+    // Handle populate transaction error.
+    return;
+  }
+
+  const chain = polygon;
+
+  const transactionRequest = deserializeTransaction(
+    serializedTransaction,
+    undefined, // nonce (optional)
+    chain.id
+  );
+
+  const transactionResponse = await signer.sendTransaction(transactionRequest);
+  const transactionReceipt = await transactionResponse.wait();
+
+  console.log(transactionReceipt.transactionHash);
+}
+
+export default shieldTokens();
+
+// Then you could use this function as an onClick handler, like:
+// <button onClick={shieldTokens}>Shield Tokens</button>

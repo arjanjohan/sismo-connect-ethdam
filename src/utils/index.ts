@@ -40,7 +40,7 @@ export const mumbaiFork = {
   },
 } as const satisfies Chain;
 
-
+s
 export const goerli = {
   id: 5,
   name: "Goerli",
@@ -52,6 +52,21 @@ export const goerli = {
     },
     public: {
       http: ["https://rpc.ankr.com/eth_goerli"],
+    },
+  },
+} as const satisfies Chain;
+
+export const polygon = {
+  id: 137,
+  name: "Polygon",
+  network: "Polygon",
+  nativeCurrency: { name: "MATIC", symbol: "MATIC", decimals: 18 },
+  rpcUrls: {
+    default: {
+      http: ["https://polygon-rpc.com/"],
+    },
+    public: {
+      http: ["https://polygon-rpc.com/"],
     },
   },
 } as const satisfies Chain;
