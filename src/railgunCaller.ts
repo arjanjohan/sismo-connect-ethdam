@@ -16,8 +16,10 @@ import {
 export async function shieldTokens(window: Window) {
   // The provider would come from your Web3 connection.
   const provider = new ethers.providers.Web3Provider(window.ethereum);
+  console.log("We have a provider");
   // Get signer - this is the wallet that is currently connected.
   const signer = provider.getSigner();
+  console.log("We have a signer");
 
   const erc20AmountRecipients: RailgunERC20AmountRecipient[] = [
     {
@@ -66,7 +68,10 @@ export async function shieldTokens(window: Window) {
     chain.id
   );
 
+  console.log("Transaction request " + transactionRequest);
+
   const transactionResponse = await signer.sendTransaction(transactionRequest);
+  console.log("after transactionResponse");
   const transactionReceipt = await transactionResponse.wait();
 
   console.log(transactionReceipt.transactionHash);
