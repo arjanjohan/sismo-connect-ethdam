@@ -1,7 +1,6 @@
 import { switchNetwork, polygon, getPublicClient, handleVerifyErrors } from "@/utils";
 import { createWalletClient, http, custom, WalletClient, PublicClient, parseEther } from "viem";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
-import { abi } from "../../abi/RoboPunksNFT.json";
 import {
   SismoConnectButton,
   SismoConnectClientConfig,
