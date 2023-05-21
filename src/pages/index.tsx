@@ -1,15 +1,4 @@
-import BackButton from "@/components/BackButton";
-import {
-  switchNetwork,
-  mumbaiFork,
-  goerli,
-  polygon,
-  getPublicClient,
-  handleVerifyErrors,
-  callContract,
-  signMessage,
-  publicWalletClient,
-} from "@/utils";
+import { switchNetwork, polygon, getPublicClient, handleVerifyErrors } from "@/utils";
 import { createWalletClient, http, custom, WalletClient, PublicClient, parseEther } from "viem";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
 import { abi } from "../../abi/RoboPunksNFT.json";
@@ -20,9 +9,8 @@ import {
   AuthType,
 } from "@sismo-core/sismo-connect-react";
 import axios from "axios";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { devGroups } from "../../config";
-import { ethers } from "ethers";
 import { shieldTokens } from "../railgunCaller";
 
 export const sismoConnectConfig: SismoConnectClientConfig = {

@@ -1,15 +1,5 @@
 import { ethers } from "ethers";
-import {
-  switchNetwork,
-  mumbaiFork,
-  goerli,
-  polygon,
-  getPublicClient,
-  handleVerifyErrors,
-  callContract,
-  signMessage,
-  publicWalletClient,
-} from "@/utils";
+import { polygon } from "@/utils";
 import {
   populateShield,
   getShieldPrivateKeySignatureMessage,
