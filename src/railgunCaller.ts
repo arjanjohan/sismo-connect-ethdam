@@ -1,6 +1,8 @@
 import { ethers } from "ethers";
 import { polygon } from "@/utils";
 import {
+  startRailgunEngine,
+  StartRailgunEngineResponse,
   populateShield,
   getShieldPrivateKeySignatureMessage,
   gasEstimateForShield,
@@ -13,7 +15,58 @@ import {
   deserializeTransaction,
 } from "@railgun-community/shared-models";
 
+import { ArtifactStore } from '@railgun-community/quickstart';
+import localforage from 'localforage';
+import LevelDB from 'level-js';
+
+
+const initialize = (): StartRailgunEngineResponse => {
+
+  // Name for your wallet implementation.
+  // Encrypted and viewable in private transaction history.
+  // Maximum of 16 characters, lowercase.
+  const walletSource = 'quickstart demo';
+
+  // LevelDOWN compatible database for storing encrypted wallets.
+  const db = new LevelDB("database_wallets");
+
+  // Whether to forward Engine debug logs to Logger.
+  const shouldDebug = true;
+
+  // Persistent store for downloading large artifact files.
+  // See Quickstart Developer Guide for platform implementations.
+  const artifactStore = new ArtifactStore(
+    async (path: string) => {
+      return localforage.getItem(path);
+    },
+    async (dir: string, path: string, item: string | Buffer) => {
+      await localforage.setItem(path, item);
+    },
+    async (path: string) => (await localforage.getItem(path)) != null,
+  );
+  // Whether to download native C++ or web-assembly artifacts.
+  // True for mobile. False for nodejs and browser.
+  const useNativeArtifacts = false;
+
+  // Whether to skip merkletree syncs and private balance scans. 
+  // Only set to TRUE in shield-only applications that don't 
+  //  load private wallets or balances.
+  const skipMerkletreeScans = false;
+
+  return startRailgunEngine(
+    walletSource,
+    db,
+    shouldDebug,
+    artifactStore,
+    useNativeArtifacts,
+    skipMerkletreeScans,
+  )
+}
+
 export async function shieldTokens(window: Window) {
+  initialize()
+  console.log("StartRailgunEngineResponse")
+  console.log(StartRailgunEngineResponse)
   // The provider would come from your Web3 connection.
   const provider = new ethers.providers.Web3Provider(window.ethereum);
   console.log("We have a provider");
