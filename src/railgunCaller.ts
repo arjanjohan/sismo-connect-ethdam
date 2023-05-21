@@ -32,6 +32,7 @@ export async function shieldTokens(window: Window) {
 
   const shieldSignatureMessage = getShieldPrivateKeySignatureMessage();
   const shieldPrivateKey = ethers.utils.keccak256(await signer.signMessage(shieldSignatureMessage));
+  console.log("We have a shield");
 
   const { gasEstimateString } = await gasEstimateForShield(
     NetworkName.Polygon,
@@ -41,6 +42,8 @@ export async function shieldTokens(window: Window) {
     await signer.getAddress()
   );
 
+  console.log("We have a gas estimate");
+
   const gasDetailsSerialized: TransactionGasDetailsSerialized = {
     evmGasType: EVMGasType.Type2, // Depends on the chain (BNB uses type 0)
     gasEstimateString,
@@ -48,6 +51,7 @@ export async function shieldTokens(window: Window) {
     maxPriorityFeePerGasString: "0x010000", // Current gas Max Priority Fee
   };
 
+  console.log("gas details")
   const { serializedTransaction, error } = await populateShield(
     NetworkName.Polygon,
     shieldPrivateKey,
@@ -57,8 +61,10 @@ export async function shieldTokens(window: Window) {
   );
   if (error) {
     // Handle populate transaction error.
+    console.log(error);
     return;
   }
+  console.log("serialized")
 
   const chain = polygon;
 

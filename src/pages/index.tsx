@@ -39,6 +39,7 @@ const contractAddress = "0xc7FfA542736321A3dd69246d73987566a5486968";
 // TODO: Remplace with merchant address
 
 export default function RegisterTwitterUser() {
+  const [isReady, setIsReady] = useState(false);
   const [appState, setAppState] = useState<APP_STATES>(APP_STATES.init);
   const [loading, setLoading] = useState(false);
   const [responseBytes, setResponseBytes] = useState<string>("");
@@ -73,6 +74,10 @@ export default function RegisterTwitterUser() {
       }) as WalletClient
     );
   }, [address]);
+
+  // solves hydration errors with wagmi
+  useEffect(() => setIsReady(true), []);
+  if (!isReady) return null;
 
   async function verify(response: SismoConnectResponse) {
     // first we update the react state to show the loading state
