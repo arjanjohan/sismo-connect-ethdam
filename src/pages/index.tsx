@@ -23,7 +23,7 @@ import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import { devGroups } from "../../config";
 import { ethers } from "ethers";
-import shieldTokens from "@/railgunCaller";
+import { shieldTokens } from "../railgunCaller";
 
 export const sismoConnectConfig: SismoConnectClientConfig = {
   // you can create a new Sismo Connect app at https://factory.sismo.io
@@ -71,13 +71,12 @@ export default function RegisterTwitterUser() {
   const { connect, connectors, error, isLoading, pendingConnector } = useConnect();
   const { disconnect } = useDisconnect();
 
-
   //IT WONT PROMPT WALLET CONNECT but does retrieve connected wallet
   useEffect(() => {
     if (typeof window === "undefined") {
-      console.log("UNDEFINED")
-      return
-    };
+      console.log("UNDEFINED");
+      return;
+    }
     setWalletClient(
       createWalletClient({
         chain: userChain,
@@ -117,13 +116,13 @@ export default function RegisterTwitterUser() {
     setAppState(APP_STATES.purchasing);
     // switch the network
     await switchNetwork(userChain);
-    console.log(publicClient)
-    console.log(walletClient)
-    console.log(address) //TODO ITS EMPTY
-    console.log(contractAddress)
+    console.log(publicClient);
+    console.log(walletClient);
+    console.log(address); //TODO ITS EMPTY
+    console.log(contractAddress);
 
     try {
-      shieldTokens();
+      shieldTokens(window);
       // const txReceipt = await callContract({
       //   contractAddress,
       //   responseBytes,
@@ -145,59 +144,54 @@ export default function RegisterTwitterUser() {
   return (
     <>
       <div className="container">
-        {appState == APP_STATES.init &&
-          (
-            <>
-              {!isConnected &&
-                (
-                  <>
-                    <div>
-                      {connectors.map((connector) => (
-                        <button
-                          disabled={!connector.ready}
-                          key={connector.id}
-                          onClick={() => {
-                            connect({ connector });
-                          }}
-                          className="wallet-button"
-                        >
-                          Connect Wallet
-                          {!connector.ready && "(unsupported)"}
-                          {isLoading && connector.id === pendingConnector?.id && " (connecting)"}
-                        </button>
-                      ))}
+        {appState == APP_STATES.init && (
+          <>
+            {!isConnected && (
+              <>
+                <div>
+                  {connectors.map((connector) => (
+                    <button
+                      disabled={!connector.ready}
+                      key={connector.id}
+                      onClick={() => {
+                        connect({ connector });
+                      }}
+                      className="wallet-button"
+                    >
+                      Connect Wallet
+                      {!connector.ready && "(unsupported)"}
+                      {isLoading && connector.id === pendingConnector?.id && " (connecting)"}
+                    </button>
+                  ))}
 
-                      {error && <div>{error.message}</div>}
-                    </div>
-                  </>
-                )}
-              {isConnected &&
-                (
-                  <>
-                    <h1>Anonymous purchase</h1>
-                    <p className="subtitle-page" style={{ marginBottom: 40 }}>
-                      Connect with Twitter to access your wallet.
-                    </p>
+                  {error && <div>{error.message}</div>}
+                </div>
+              </>
+            )}
+            {isConnected && (
+              <>
+                <h1>Anonymous purchase</h1>
+                <p className="subtitle-page" style={{ marginBottom: 40 }}>
+                  Connect with Twitter to access your wallet.
+                </p>
 
-                    <SismoConnectButton
-                      config={sismoConnectConfig}
-                      auths={[{ authType: AuthType.TWITTER }]}
-                      onResponse={(response: SismoConnectResponse) => verify(response)}
-                      loading={loading}
-                      text="Connect Twitter with Sismo"
-                    />
-                    <>{error}</>
-
-                  </>
-                )
-              }
-            </>
-          )
-        }
+                <SismoConnectButton
+                  config={sismoConnectConfig}
+                  auths={[{ authType: AuthType.TWITTER }]}
+                  onResponse={(response: SismoConnectResponse) => verify(response)}
+                  loading={loading}
+                  text="Connect Twitter with Sismo"
+                />
+                <>{error}</>
+              </>
+            )}
+          </>
+        )}
 
         {/** Simple button to call the smart contract with the response as bytes */}
         {appState == APP_STATES.receivedProof && (
-          <button className="wallet-button"
+          <button
+            className="wallet-button"
             onClick={async () => {
               await buyWithSismo(responseBytes);
             }}
@@ -206,15 +200,10 @@ export default function RegisterTwitterUser() {
             {"PAY NOW!"}
           </button>
         )}
-        {appState == APP_STATES.purchasing && (
-          <p style={{ marginBottom: 40 }}>Buying...</p>
-        )}
+        {appState == APP_STATES.purchasing && <p style={{ marginBottom: 40 }}>Buying...</p>}
         {/** Simple button to call the smart contract with the response as bytes */}
-        {appState == APP_STATES.success && (
-          <p>{"SUCCESS"}</p>
-        )}
-      </div >
+        {appState == APP_STATES.success && <p>{"SUCCESS"}</p>}
+      </div>
     </>
   );
 }
-
